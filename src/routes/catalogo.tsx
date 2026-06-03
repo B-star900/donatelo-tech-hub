@@ -81,7 +81,7 @@ function Catalogo() {
   }, [products, search]);
 
   const setParam = (patch: Partial<SearchParams>) =>
-    navigate({ search: (prev) => ({ ...prev, ...patch }) });
+    navigate({ search: (prev: SearchParams) => ({ ...prev, ...patch }) });
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-10 md:px-6">
