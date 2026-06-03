@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { categoriesQuery, formatPrice, slugify } from "@/lib/products";
 import type { Database } from "@/integrations/supabase/types";
+import { ImageUploader } from "@/components/admin/ImageUploader";
 
 type ProductRow = Database["public"]["Tables"]["productos"]["Row"];
 
