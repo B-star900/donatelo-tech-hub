@@ -1,7 +1,8 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { Minus, Plus, ShoppingBag, Trash2 } from "lucide-react";
 import { useState } from "react";
-import { buildWhatsAppUrl, useCart } from "@/lib/cart";
+import { toast } from "sonner";
+import { buildWhatsAppUrl, createOrder, useCart } from "@/lib/cart";
 import { formatPrice } from "@/lib/products";
 
 export const Route = createFileRoute("/carrito")({
@@ -10,10 +11,14 @@ export const Route = createFileRoute("/carrito")({
 });
 
 function CartPage() {
-  const { items, setQty, remove, subtotal } = useCart();
+  const { items, setQty, remove, subtotal, clear } = useCart();
+  const navigate = useNavigate();
   const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
   const [address, setAddress] = useState("");
-  const [payment, setPayment] = useState("Efectivo");
+  const [notas, setNotas] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
   if (items.length === 0) {
     return (
@@ -23,23 +28,33 @@ function CartPage() {
         </div>
         <h1 className="mt-6 font-display text-3xl font-black">Tu carrito está vacío</h1>
         <p className="mt-2 text-muted-foreground">Sumá algún producto para continuar.</p>
-        <Link
-          to="/catalogo"
-          className="mt-6 inline-flex h-12 items-center rounded-full bg-ink px-6 text-sm font-bold text-white hover:bg-brand"
-        >
+        <Link to="/catalogo" className="mt-6 inline-flex h-12 items-center rounded-full bg-ink px-6 text-sm font-bold text-white hover:bg-brand">
           Explorar catálogo
         </Link>
       </div>
     );
   }
 
-  const waUrl = buildWhatsAppUrl({
-    items,
-    total: subtotal,
-    name: name || undefined,
-    address: address || undefined,
-    payment,
-  });
+  async function handleCheckout() {
+    if (!name.trim() || !phone.trim()) {
+      toast.error("Necesitamos tu nombre y teléfono.");
+      return;
+    }
+    setSubmitting(true);
+    try {
+      const data = { items, total: subtotal, name, phone, email, address, notas };
+      await createOrder(data);
+      const url = buildWhatsAppUrl(data);
+      toast.success("Pedido registrado. Te llevamos a WhatsApp.");
+      clear();
+      window.open(url, "_blank", "noopener");
+      navigate({ to: "/" });
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "No pudimos guardar el pedido");
+    } finally {
+      setSubmitting(false);
+    }
+  }
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-10 md:px-6">
@@ -51,45 +66,26 @@ function CartPage() {
             const price = it.product.salePrice ?? it.product.price;
             return (
               <div key={it.product.id} className="flex gap-4 rounded-2xl border border-border p-4">
-                <img
-                  src={it.product.image}
-                  alt={it.product.name}
-                  className="h-24 w-24 rounded-xl object-cover"
-                />
+                <img src={it.product.image} alt={it.product.name} className="h-24 w-24 rounded-xl object-cover" />
                 <div className="flex flex-1 flex-col">
                   <div className="flex items-start justify-between gap-2">
                     <div>
-                      <p className="text-xs uppercase tracking-widest text-muted-foreground">
-                        {it.product.brand}
-                      </p>
-                      <Link
-                        to="/producto/$id"
-                        params={{ id: it.product.id }}
-                        className="font-semibold hover:text-brand"
-                      >
+                      <p className="text-xs uppercase tracking-widest text-muted-foreground">{it.product.brand}</p>
+                      <Link to="/producto/$id" params={{ id: it.product.id }} className="font-semibold hover:text-brand">
                         {it.product.name}
                       </Link>
                     </div>
-                    <button
-                      onClick={() => remove(it.product.id)}
-                      className="text-muted-foreground hover:text-brand"
-                    >
+                    <button onClick={() => remove(it.product.id)} className="text-muted-foreground hover:text-brand">
                       <Trash2 className="h-4 w-4" />
                     </button>
                   </div>
                   <div className="mt-auto flex items-center justify-between">
                     <div className="inline-flex items-center rounded-full border border-border">
-                      <button
-                        onClick={() => setQty(it.product.id, it.qty - 1)}
-                        className="grid h-9 w-9 place-items-center"
-                      >
+                      <button onClick={() => setQty(it.product.id, it.qty - 1)} className="grid h-9 w-9 place-items-center">
                         <Minus className="h-3.5 w-3.5" />
                       </button>
                       <span className="w-8 text-center text-sm font-semibold">{it.qty}</span>
-                      <button
-                        onClick={() => setQty(it.product.id, it.qty + 1)}
-                        className="grid h-9 w-9 place-items-center"
-                      >
+                      <button onClick={() => setQty(it.product.id, it.qty + 1)} className="grid h-9 w-9 place-items-center">
                         <Plus className="h-3.5 w-3.5" />
                       </button>
                     </div>
@@ -114,40 +110,31 @@ function CartPage() {
           </div>
 
           <div className="mt-6 space-y-3">
-            <Field label="Tu nombre" value={name} onChange={setName} placeholder="Juan Pérez" />
-            <Field
-              label="Dirección"
-              value={address}
-              onChange={setAddress}
-              placeholder="Calle 123, Ciudad"
-            />
+            <Field label="Tu nombre *" value={name} onChange={setName} placeholder="Juan Pérez" />
+            <Field label="Teléfono *" value={phone} onChange={setPhone} placeholder="+54 9 11..." />
+            <Field label="Email" value={email} onChange={setEmail} placeholder="tu@email.com" />
+            <Field label="Dirección" value={address} onChange={setAddress} placeholder="Calle 123, Ciudad" />
             <div>
-              <label className="mb-1 block text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-                Método de pago
-              </label>
-              <select
-                value={payment}
-                onChange={(e) => setPayment(e.target.value)}
-                className="h-11 w-full rounded-xl border border-border bg-background px-3 text-sm"
-              >
-                <option>Efectivo</option>
-                <option>Transferencia</option>
-                <option>Tarjeta</option>
-                <option>MercadoPago</option>
-              </select>
+              <label className="mb-1 block text-xs font-semibold uppercase tracking-widest text-muted-foreground">Notas</label>
+              <textarea
+                value={notas}
+                onChange={(e) => setNotas(e.target.value)}
+                rows={3}
+                placeholder="Forma de pago, horario, etc."
+                className="w-full rounded-xl border border-border bg-background p-3 text-sm outline-none focus:border-foreground/40"
+              />
             </div>
           </div>
 
-          <a
-            href={waUrl}
-            target="_blank"
-            rel="noopener"
-            className="mt-6 flex h-12 w-full items-center justify-center rounded-full bg-brand text-sm font-bold text-brand-foreground shadow-brand transition-transform hover:scale-[1.01]"
+          <button
+            onClick={handleCheckout}
+            disabled={submitting}
+            className="mt-6 flex h-12 w-full items-center justify-center rounded-full bg-brand text-sm font-bold text-brand-foreground shadow-brand transition-transform hover:scale-[1.01] disabled:opacity-60"
           >
-            Finalizar por WhatsApp →
-          </a>
+            {submitting ? "Procesando..." : "Finalizar por WhatsApp →"}
+          </button>
           <p className="mt-3 text-center text-xs text-muted-foreground">
-            Te redirigimos a WhatsApp con el detalle del pedido.
+            Guardamos tu pedido y te llevamos a WhatsApp con el detalle.
           </p>
         </aside>
       </div>
@@ -177,9 +164,7 @@ function Field({
 }) {
   return (
     <div>
-      <label className="mb-1 block text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-        {label}
-      </label>
+      <label className="mb-1 block text-xs font-semibold uppercase tracking-widest text-muted-foreground">{label}</label>
       <input
         value={value}
         onChange={(e) => onChange(e.target.value)}

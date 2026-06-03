@@ -1,7 +1,7 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { Link } from "@tanstack/react-router";
 import { Minus, Plus, ShoppingBag, Trash2, X } from "lucide-react";
-import { buildWhatsAppUrl, useCart } from "@/lib/cart";
+import { useCart } from "@/lib/cart";
 import { formatPrice } from "@/lib/products";
 
 export function CartDrawer() {
@@ -120,15 +120,13 @@ export function CartDrawer() {
                     <span className="text-sm text-muted-foreground">Subtotal</span>
                     <span className="text-xl font-bold">{formatPrice(subtotal)}</span>
                   </div>
-                  <a
-                    href={buildWhatsAppUrl({ items, total: subtotal })}
-                    target="_blank"
-                    rel="noopener"
+                  <Link
+                    to="/carrito"
                     onClick={close}
                     className="flex h-12 w-full items-center justify-center rounded-full bg-brand text-sm font-bold text-brand-foreground shadow-brand transition-transform hover:scale-[1.01]"
                   >
-                    Finalizar por WhatsApp →
-                  </a>
+                    Finalizar pedido →
+                  </Link>
                   <Link
                     to="/carrito"
                     onClick={close}

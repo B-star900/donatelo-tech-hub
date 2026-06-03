@@ -1,21 +1,20 @@
 import { Link } from "@tanstack/react-router";
-import { ShoppingBag, Menu, X, Search } from "lucide-react";
+import { ShoppingBag, Menu, X, Search, LogIn, LayoutDashboard } from "lucide-react";
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useCart } from "@/lib/cart";
+import { useAuth } from "@/hooks/use-auth";
 import { cn } from "@/lib/utils";
 
 const nav = [
   { to: "/", label: "Inicio" },
   { to: "/catalogo", label: "Catálogo" },
-  { to: "/catalogo", label: "Celulares", search: { cat: "Celulares" } },
-  { to: "/catalogo", label: "Informática", search: { cat: "Informática" } },
-  { to: "/catalogo", label: "Mecánica", search: { cat: "Mecánica" } },
   { to: "/contacto", label: "Contacto" },
 ];
 
 export function Header() {
   const { count, open } = useCart();
+  const { isAdmin, user } = useAuth();
   const [scrolled, setScrolled] = useState(false);
   const [menu, setMenu] = useState(false);
 
@@ -44,11 +43,10 @@ export function Header() {
         </Link>
 
         <nav className="hidden items-center gap-8 md:flex">
-          {nav.map((n, i) => (
+          {nav.map((n) => (
             <Link
-              key={i}
+              key={n.to + n.label}
               to={n.to}
-              search={n.search as any}
               className="text-sm font-medium text-foreground/80 transition-colors hover:text-brand"
               activeProps={{ className: "text-brand" }}
               activeOptions={{ exact: true }}
@@ -66,6 +64,22 @@ export function Header() {
           >
             <Search className="h-5 w-5" />
           </Link>
+          {isAdmin ? (
+            <Link
+              to="/admin"
+              className="hidden md:inline-flex h-10 items-center gap-1.5 rounded-full bg-ink px-3 text-xs font-bold text-white hover:bg-brand"
+            >
+              <LayoutDashboard className="h-4 w-4" /> Admin
+            </Link>
+          ) : !user ? (
+            <Link
+              to="/auth"
+              className="hidden md:inline-grid h-10 w-10 place-items-center rounded-full text-foreground/80 hover:bg-secondary"
+              aria-label="Acceso"
+            >
+              <LogIn className="h-5 w-5" />
+            </Link>
+          ) : null}
           <button
             onClick={open}
             className="relative grid h-10 w-10 place-items-center rounded-full text-foreground/90 hover:bg-secondary"
@@ -104,17 +118,25 @@ export function Header() {
             className="overflow-hidden border-t border-border md:hidden"
           >
             <div className="flex flex-col gap-1 bg-background p-4">
-              {nav.map((n, i) => (
+              {nav.map((n) => (
                 <Link
-                  key={i}
+                  key={n.to + n.label}
                   to={n.to}
-                  search={n.search as any}
                   onClick={() => setMenu(false)}
                   className="rounded-lg px-3 py-3 text-base font-medium hover:bg-secondary"
                 >
                   {n.label}
                 </Link>
               ))}
+              {isAdmin ? (
+                <Link to="/admin" onClick={() => setMenu(false)} className="rounded-lg px-3 py-3 text-base font-medium hover:bg-secondary">
+                  Admin
+                </Link>
+              ) : !user ? (
+                <Link to="/auth" onClick={() => setMenu(false)} className="rounded-lg px-3 py-3 text-base font-medium hover:bg-secondary">
+                  Acceso
+                </Link>
+              ) : null}
             </div>
           </motion.div>
         )}

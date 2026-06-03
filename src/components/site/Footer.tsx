@@ -38,9 +38,9 @@ export function Footer() {
             </h4>
             <ul className="space-y-2 text-sm text-white/80">
               <li><Link to="/catalogo">Catálogo</Link></li>
-              <li><Link to="/catalogo" search={{ cat: "Celulares" } as any}>Celulares</Link></li>
-              <li><Link to="/catalogo" search={{ cat: "Informática" } as any}>Informática</Link></li>
-              <li><Link to="/catalogo" search={{ cat: "Mecánica" } as any}>Mecánica</Link></li>
+              <li><Link to="/catalogo" search={{ cat: "Celulares" } as never}>Celulares</Link></li>
+              <li><Link to="/catalogo" search={{ cat: "Informática" } as never}>Informática</Link></li>
+              <li><Link to="/catalogo" search={{ cat: "Mecánica" } as never}>Mecánica</Link></li>
             </ul>
           </div>
 
