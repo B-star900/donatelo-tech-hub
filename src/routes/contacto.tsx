@@ -30,7 +30,7 @@ function Contacto() {
             href: `https://wa.me/${WHATSAPP_NUMBER}`,
           },
           { icon: Mail, title: "Email", value: "hola@donatelo.com", href: "mailto:hola@donatelo.com" },
-          { icon: Phone, title: "Teléfono", value: "+54 11 0000-0000", href: "tel:+5491100000000" },
+          { icon: Phone, title: "Teléfono", value: "+53 54633440", href: "tel:+5354633440" },
         ].map(({ icon: Icon, title, value, href }) => (
           <a
             key={title}
