@@ -12,7 +12,7 @@ export const Route = createFileRoute("/producto/$id")({
   loader: async ({ params, context }) => {
     const product = await context.queryClient.ensureQueryData(productQuery(params.id));
     if (!product) throw notFound();
-    context.queryClient.ensureQueryData(productsQuery);
+    await context.queryClient.ensureQueryData(productsQuery);
   },
   head: () => ({ meta: [{ title: "Producto — DONATELO" }] }),
   errorComponent: ({ error }) => (

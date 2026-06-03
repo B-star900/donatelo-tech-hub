@@ -25,9 +25,11 @@ export const Route = createFileRoute("/catalogo")({
       { name: "description", content: "Explorá todos nuestros productos premium." },
     ],
   }),
-  loader: ({ context }) => {
-    context.queryClient.ensureQueryData(productsQuery);
-    context.queryClient.ensureQueryData(categoriesQuery);
+  loader: async ({ context }) => {
+    await Promise.all([
+      context.queryClient.ensureQueryData(productsQuery),
+      context.queryClient.ensureQueryData(categoriesQuery),
+    ]);
   },
   errorComponent: ({ error }) => (
     <div className="mx-auto max-w-xl px-4 py-24 text-center text-muted-foreground">{error.message}</div>
