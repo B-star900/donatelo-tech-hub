@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { categoriesQuery, formatPrice, slugify } from "@/lib/products";
 import type { Database } from "@/integrations/supabase/types";
+import { ImageUploader } from "@/components/admin/ImageUploader";
 
 type ProductRow = Database["public"]["Tables"]["productos"]["Row"];
 
@@ -247,7 +248,15 @@ function ProductDialog({
           <Field label="Precio actual" type="number" value={form.precio} onChange={(v) => setForm({ ...form, precio: v })} required />
           <Field label="Precio original (si está en oferta)" type="number" value={form.precio_original} onChange={(v) => setForm({ ...form, precio_original: v })} />
           <Field label="Stock" type="number" value={form.stock} onChange={(v) => setForm({ ...form, stock: v })} />
-          <Field label="URL de imagen" value={form.imagen_url} onChange={(v) => setForm({ ...form, imagen_url: v })} placeholder="https://..." />
+          <div className="sm:col-span-2">
+            <ImageUploader
+              bucket="productos"
+              value={form.imagen_url}
+              onChange={(url) => setForm({ ...form, imagen_url: url })}
+              label="Imagen del producto"
+            />
+          </div>
+          <Field label="O pegar URL de imagen" value={form.imagen_url} onChange={(v) => setForm({ ...form, imagen_url: v })} placeholder="https://..." />
           <div className="sm:col-span-2">
             <Label>Descripción</Label>
             <textarea
