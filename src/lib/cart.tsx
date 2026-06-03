@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import type { Product } from "./products";
 
 export interface CartItem {
@@ -58,7 +59,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
           const ex = curr.find((c) => c.product.id === product.id);
           if (ex)
             return curr.map((c) =>
-              c.product.id === product.id ? { ...c, qty: Math.min(c.qty + qty, product.stock) } : c,
+              c.product.id === product.id
+                ? { ...c, qty: Math.min(c.qty + qty, product.stock) }
+                : c,
             );
           return [...curr, { product, qty: Math.min(qty, product.stock) }];
         }),
@@ -88,16 +91,20 @@ export function useCart() {
   return c;
 }
 
-// Update with the business WhatsApp number (international format, no + or spaces).
+// Número de WhatsApp del negocio (formato internacional, sin + ni espacios).
 export const WHATSAPP_NUMBER = "5491100000000";
 
-export function buildWhatsAppUrl(opts: {
+export interface CheckoutData {
   items: CartItem[];
   total: number;
-  name?: string;
+  name: string;
+  phone: string;
+  email?: string;
   address?: string;
-  payment?: string;
-}) {
+  notas?: string;
+}
+
+export function buildWhatsAppText(opts: CheckoutData) {
   const lines = [
     "*Nuevo pedido — DONATELO • CELULARES*",
     "",
@@ -107,10 +114,36 @@ export function buildWhatsAppUrl(opts: {
     ),
     "",
     `*Total:* $${opts.total.toLocaleString("es-AR")}`,
+    `*Cliente:* ${opts.name}`,
+    `*Tel:* ${opts.phone}`,
   ];
-  if (opts.name) lines.push(`*Cliente:* ${opts.name}`);
+  if (opts.email) lines.push(`*Email:* ${opts.email}`);
   if (opts.address) lines.push(`*Dirección:* ${opts.address}`);
-  if (opts.payment) lines.push(`*Pago:* ${opts.payment}`);
-  const text = encodeURIComponent(lines.join("\n"));
-  return `https://wa.me/${WHATSAPP_NUMBER}?text=${text}`;
+  if (opts.notas) lines.push(`*Notas:* ${opts.notas}`);
+  return lines.join("\n");
+}
+
+export function buildWhatsAppUrl(opts: CheckoutData) {
+  return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(buildWhatsAppText(opts))}`;
+}
+
+/** Persists order to database, returns row or null. */
+export async function createOrder(opts: CheckoutData) {
+  const payload = {
+    cliente_nombre: opts.name,
+    cliente_telefono: opts.phone,
+    cliente_email: opts.email || null,
+    cliente_direccion: opts.address || null,
+    notas: opts.notas || null,
+    items: opts.items.map((i) => ({
+      slug: i.product.id,
+      nombre: i.product.name,
+      qty: i.qty,
+      precio: i.product.salePrice ?? i.product.price,
+    })),
+    total: opts.total,
+  };
+  const { data, error } = await supabase.from("pedidos").insert(payload).select().single();
+  if (error) throw error;
+  return data;
 }
