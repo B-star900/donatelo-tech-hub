@@ -92,7 +92,7 @@ export function useCart() {
 }
 
 // Número de WhatsApp del negocio (formato internacional, sin + ni espacios).
-export const WHATSAPP_NUMBER = "5491100000000";
+export const WHATSAPP_NUMBER = "5354633440";
 
 export interface CheckoutData {
   items: CartItem[];
