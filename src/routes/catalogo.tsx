@@ -1,11 +1,12 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { Search, SlidersHorizontal } from "lucide-react";
 import { useMemo, useState } from "react";
 import { ProductCard } from "@/components/site/ProductCard";
-import { categories, products, type Category } from "@/lib/products";
+import { categoriesQuery, productsQuery } from "@/lib/products";
 
 interface SearchParams {
-  cat?: Category;
+  cat?: string;
   q?: string;
   brand?: string;
   sort?: "recent" | "price-asc" | "price-desc" | "discount" | "rating";
@@ -13,7 +14,7 @@ interface SearchParams {
 
 export const Route = createFileRoute("/catalogo")({
   validateSearch: (s: Record<string, unknown>): SearchParams => ({
-    cat: (s.cat as Category) || undefined,
+    cat: (s.cat as string) || undefined,
     q: (s.q as string) || undefined,
     brand: (s.brand as string) || undefined,
     sort: (s.sort as SearchParams["sort"]) || "recent",
@@ -24,6 +25,15 @@ export const Route = createFileRoute("/catalogo")({
       { name: "description", content: "Explorá todos nuestros productos premium." },
     ],
   }),
+  loader: async ({ context }) => {
+    await Promise.all([
+      context.queryClient.ensureQueryData(productsQuery),
+      context.queryClient.ensureQueryData(categoriesQuery),
+    ]);
+  },
+  errorComponent: ({ error }) => (
+    <div className="mx-auto max-w-xl px-4 py-24 text-center text-muted-foreground">{error.message}</div>
+  ),
   component: Catalogo,
 });
 
@@ -31,10 +41,12 @@ function Catalogo() {
   const search = Route.useSearch();
   const navigate = useNavigate({ from: "/catalogo" });
   const [showFilters, setShowFilters] = useState(false);
+  const { data: products } = useSuspenseQuery(productsQuery);
+  const { data: categories } = useSuspenseQuery(categoriesQuery);
 
   const brands = useMemo(
-    () => Array.from(new Set(products.map((p) => p.brand))).sort(),
-    [],
+    () => Array.from(new Set(products.map((p) => p.brand).filter(Boolean))).sort(),
+    [products],
   );
 
   const filtered = useMemo(() => {
@@ -46,8 +58,7 @@ function Catalogo() {
       list = list.filter(
         (p) =>
           p.name.toLowerCase().includes(q) ||
-          p.brand.toLowerCase().includes(q) ||
-          p.tags.some((t) => t.includes(q)),
+          p.brand.toLowerCase().includes(q),
       );
     }
     switch (search.sort) {
@@ -67,14 +78,12 @@ function Catalogo() {
           return db - da;
         });
         break;
-      default:
-        break;
     }
     return list;
-  }, [search]);
+  }, [products, search]);
 
   const setParam = (patch: Partial<SearchParams>) =>
-    navigate({ search: (prev: any) => ({ ...prev, ...patch }) });
+    navigate({ search: (prev: SearchParams) => ({ ...prev, ...patch }) });
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-10 md:px-6">
@@ -96,12 +105,12 @@ function Catalogo() {
               defaultValue={search.q ?? ""}
               onChange={(e) => setParam({ q: e.target.value || undefined })}
               placeholder="Buscar..."
-              className="h-11 w-full rounded-full border border-border bg-surface pl-10 pr-4 text-sm outline-none transition-colors focus:border-foreground/40 md:w-64"
+              className="h-11 w-full rounded-full border border-border bg-surface pl-10 pr-4 text-sm outline-none focus:border-foreground/40 md:w-64"
             />
           </div>
           <select
             value={search.sort ?? "recent"}
-            onChange={(e) => setParam({ sort: e.target.value as any })}
+            onChange={(e) => setParam({ sort: e.target.value as SearchParams["sort"] })}
             className="h-11 rounded-full border border-border bg-surface px-4 text-sm outline-none"
           >
             <option value="recent">Más recientes</option>
@@ -122,49 +131,29 @@ function Catalogo() {
       <div className="mt-8 grid gap-8 md:grid-cols-[220px_1fr]">
         <aside className={`${showFilters ? "block" : "hidden"} md:block`}>
           <FilterGroup label="Categoría">
-            <FilterChip
-              active={!search.cat}
-              onClick={() => setParam({ cat: undefined })}
-              label="Todas"
-            />
+            <FilterChip active={!search.cat} onClick={() => setParam({ cat: undefined })} label="Todas" />
             {categories.map((c) => (
-              <FilterChip
-                key={c}
-                active={search.cat === c}
-                onClick={() => setParam({ cat: c })}
-                label={c}
-              />
+              <FilterChip key={c.id} active={search.cat === c.nombre} onClick={() => setParam({ cat: c.nombre })} label={c.nombre} />
             ))}
           </FilterGroup>
-          <FilterGroup label="Marca">
-            <FilterChip
-              active={!search.brand}
-              onClick={() => setParam({ brand: undefined })}
-              label="Todas"
-            />
-            {brands.map((b) => (
-              <FilterChip
-                key={b}
-                active={search.brand === b}
-                onClick={() => setParam({ brand: b })}
-                label={b}
-              />
-            ))}
-          </FilterGroup>
+          {brands.length > 0 && (
+            <FilterGroup label="Marca">
+              <FilterChip active={!search.brand} onClick={() => setParam({ brand: undefined })} label="Todas" />
+              {brands.map((b) => (
+                <FilterChip key={b} active={search.brand === b} onClick={() => setParam({ brand: b })} label={b} />
+              ))}
+            </FilterGroup>
+          )}
         </aside>
 
         {filtered.length === 0 ? (
           <div className="grid place-items-center rounded-3xl border border-dashed border-border py-24 text-center">
             <p className="text-lg font-semibold">No encontramos resultados</p>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Probá quitando algún filtro o buscando otra cosa.
-            </p>
+            <p className="mt-1 text-sm text-muted-foreground">Probá quitando algún filtro.</p>
           </div>
         ) : (
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {filtered.map((p, i) => (
-              <ProductCard key={p.id} product={p} index={i} />
-            ))}
+            {filtered.map((p, i) => <ProductCard key={p.id} product={p} index={i} />)}
           </div>
         )}
       </div>
@@ -175,23 +164,13 @@ function Catalogo() {
 function FilterGroup({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="mb-6">
-      <p className="mb-3 text-xs font-bold uppercase tracking-widest text-muted-foreground">
-        {label}
-      </p>
+      <p className="mb-3 text-xs font-bold uppercase tracking-widest text-muted-foreground">{label}</p>
       <div className="flex flex-wrap gap-2">{children}</div>
     </div>
   );
 }
 
-function FilterChip({
-  active,
-  onClick,
-  label,
-}: {
-  active: boolean;
-  onClick: () => void;
-  label: string;
-}) {
+function FilterChip({ active, onClick, label }: { active: boolean; onClick: () => void; label: string }) {
   return (
     <button
       onClick={onClick}

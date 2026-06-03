@@ -1,18 +1,19 @@
-import phoneImg from "@/assets/product-phone-1.jpg";
-import laptopImg from "@/assets/product-laptop.jpg";
-import earbudsImg from "@/assets/product-earbuds.jpg";
-import watchImg from "@/assets/product-watch.jpg";
-import keyboardImg from "@/assets/product-keyboard.jpg";
-import mouseImg from "@/assets/product-mouse.jpg";
-import toolsImg from "@/assets/product-tools.jpg";
+import { queryOptions } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import type { Database } from "@/integrations/supabase/types";
 
-export type Category = "Celulares" | "Informática" | "Mecánica";
+export type ProductRow = Database["public"]["Tables"]["productos"]["Row"];
+export type CategoryRow = Database["public"]["Tables"]["categorias"]["Row"];
 
 export interface Product {
+  /** Slug — used as URL id and cart key. */
   id: string;
+  /** Database UUID, only used by admin. */
+  dbId: string;
   name: string;
   brand: string;
-  category: Category;
+  category: string;
+  categorySlug?: string;
   price: number;
   salePrice?: number;
   shortDesc: string;
@@ -27,172 +28,87 @@ export interface Product {
   featured?: boolean;
 }
 
-export const products: Product[] = [
-  {
-    id: "iphone-15-pro-max",
-    name: "iPhone 15 Pro Max 256GB",
-    brand: "Apple",
-    category: "Celulares",
-    price: 1899,
-    salePrice: 1699,
-    shortDesc: "Titanio. A17 Pro. Cámara de 48 MP.",
-    description:
-      "El iPhone 15 Pro Max combina un diseño en titanio ultraligero con el chip A17 Pro y un sistema de cámara profesional con teleobjetivo 5x. Pantalla Super Retina XDR de 6.7\" con ProMotion.",
-    image: phoneImg,
-    images: [phoneImg],
-    stock: 12,
-    rating: 4.9,
-    reviews: 248,
-    tags: ["nuevo", "premium", "5g"],
-    trending: true,
-    featured: true,
-  },
-  {
-    id: "samsung-s24-ultra",
-    name: "Samsung Galaxy S24 Ultra",
-    brand: "Samsung",
-    category: "Celulares",
-    price: 1799,
-    salePrice: 1499,
-    shortDesc: "Snapdragon 8 Gen 3. S-Pen. 200 MP.",
-    description:
-      "Galaxy AI integrado, cámara de 200 MP con zoom 100x y pantalla Dynamic AMOLED 2X de 6.8\". Construcción en titanio.",
-    image: phoneImg,
-    images: [phoneImg],
-    stock: 8,
-    rating: 4.8,
-    reviews: 192,
-    tags: ["oferta", "ai", "5g"],
-    trending: true,
-    featured: true,
-  },
-  {
-    id: "xiaomi-14-pro",
-    name: "Xiaomi 14 Pro",
-    brand: "Xiaomi",
-    category: "Celulares",
-    price: 999,
-    shortDesc: "Leica. Snapdragon 8 Gen 3.",
-    description:
-      "Sistema de cámaras Leica Summilux, carga rápida HyperCharge de 120W y pantalla LTPO 2K.",
-    image: phoneImg,
-    images: [phoneImg],
-    stock: 15,
-    rating: 4.7,
-    reviews: 134,
-    tags: ["nuevo"],
-    featured: true,
-  },
-  {
-    id: "macbook-pro-14",
-    name: 'MacBook Pro 14" M3 Pro',
-    brand: "Apple",
-    category: "Informática",
-    price: 2499,
-    salePrice: 2299,
-    shortDesc: "M3 Pro. 18 GB RAM. Liquid Retina XDR.",
-    description:
-      "Rendimiento profesional con el chip M3 Pro, hasta 18 horas de batería y pantalla Liquid Retina XDR de 14\".",
-    image: laptopImg,
-    images: [laptopImg],
-    stock: 6,
-    rating: 4.9,
-    reviews: 89,
-    tags: ["premium", "creadores"],
-    trending: true,
-    featured: true,
-  },
-  {
-    id: "airpods-pro-2",
-    name: "AirPods Pro 2 USB-C",
-    brand: "Apple",
-    category: "Informática",
-    price: 299,
-    salePrice: 249,
-    shortDesc: "Cancelación activa. Audio adaptativo.",
-    description:
-      "Chip H2, cancelación activa de ruido mejorada, audio espacial personalizado y estuche USB-C con MagSafe.",
-    image: earbudsImg,
-    images: [earbudsImg],
-    stock: 30,
-    rating: 4.8,
-    reviews: 412,
-    tags: ["oferta", "más vendido"],
-    trending: true,
-  },
-  {
-    id: "apple-watch-s9",
-    name: "Apple Watch Series 9",
-    brand: "Apple",
-    category: "Informática",
-    price: 499,
-    shortDesc: "Chip S9. Doble Tap. Always-On.",
-    description:
-      "El nuevo gesto Doble Tap, pantalla más brillante del mercado y monitoreo avanzado de salud.",
-    image: watchImg,
-    images: [watchImg],
-    stock: 18,
-    rating: 4.7,
-    reviews: 156,
-    tags: ["nuevo"],
-  },
-  {
-    id: "keychron-q1",
-    name: "Keychron Q1 Mecánico",
-    brand: "Keychron",
-    category: "Informática",
-    price: 199,
-    salePrice: 169,
-    shortDesc: "Hot-swap. Aluminio CNC. QMK/VIA.",
-    description:
-      "Teclado mecánico personalizable con chasis de aluminio mecanizado, switches hot-swap y soporte QMK/VIA.",
-    image: keyboardImg,
-    images: [keyboardImg],
-    stock: 22,
-    rating: 4.8,
-    reviews: 78,
-    tags: ["oferta"],
-  },
-  {
-    id: "logitech-g-pro",
-    name: "Logitech G Pro X Superlight",
-    brand: "Logitech",
-    category: "Informática",
-    price: 159,
-    shortDesc: "63 g. HERO 25K. Wireless.",
-    description:
-      "Mouse gaming ultraligero de 63 g con sensor HERO 25K y conexión LIGHTSPEED inalámbrica.",
-    image: mouseImg,
-    images: [mouseImg],
-    stock: 25,
-    rating: 4.9,
-    reviews: 211,
-    tags: ["gaming"],
-  },
-  {
-    id: "kit-dados-pro",
-    name: "Kit de Dados Profesional 108 pzs",
-    brand: "Stanley",
-    category: "Mecánica",
-    price: 249,
-    salePrice: 199,
-    shortDesc: "Cromo vanadio. Trinquete 72T.",
-    description:
-      "Set completo para mecánica profesional: dados métricos y SAE, trinquete de 72 dientes y estuche de transporte.",
-    image: toolsImg,
-    images: [toolsImg],
-    stock: 14,
-    rating: 4.7,
-    reviews: 64,
-    tags: ["oferta", "profesional"],
-  },
-];
+type Row = ProductRow & { categorias?: { nombre: string; slug: string } | null };
 
-export const categories: Category[] = ["Celulares", "Informática", "Mecánica"];
+const FALLBACK_IMG =
+  "https://images.unsplash.com/photo-1512499617640-c2f999098c01?w=800&q=80";
 
-export function getProduct(id: string) {
-  return products.find((p) => p.id === id);
+export function mapProduct(row: Row): Product {
+  const onSale = row.en_oferta && row.precio_original != null;
+  const basePrice = onSale ? Number(row.precio_original) : Number(row.precio);
+  const sale = onSale ? Number(row.precio) : undefined;
+  const galeria = Array.isArray(row.galeria)
+    ? (row.galeria as unknown[]).filter((g): g is string => typeof g === "string")
+    : [];
+  return {
+    id: row.slug,
+    dbId: row.id,
+    name: row.nombre,
+    brand: row.marca ?? "",
+    category: row.categorias?.nombre ?? "",
+    categorySlug: row.categorias?.slug,
+    price: basePrice,
+    salePrice: sale,
+    shortDesc: (row.descripcion ?? "").split("\n")[0]?.slice(0, 140) ?? "",
+    description: row.descripcion ?? "",
+    image: row.imagen_url || galeria[0] || FALLBACK_IMG,
+    images: galeria.length ? galeria : [row.imagen_url || FALLBACK_IMG],
+    stock: row.stock,
+    rating: Number(row.rating),
+    reviews: row.reviews_count,
+    tags: [
+      ...(row.destacado ? ["destacado"] : []),
+      ...(row.en_oferta ? ["oferta"] : []),
+    ],
+    trending: row.destacado,
+    featured: row.destacado,
+  };
 }
+
+export async function fetchProducts(): Promise<Product[]> {
+  const { data, error } = await supabase
+    .from("productos")
+    .select("*, categorias(nombre, slug)")
+    .eq("activo", true)
+    .order("created_at", { ascending: false });
+  if (error) throw error;
+  return (data ?? []).map(mapProduct);
+}
+
+export async function fetchProductBySlug(slug: string): Promise<Product | null> {
+  const { data, error } = await supabase
+    .from("productos")
+    .select("*, categorias(nombre, slug)")
+    .eq("slug", slug)
+    .maybeSingle();
+  if (error) throw error;
+  return data ? mapProduct(data) : null;
+}
+
+export async function fetchCategories(): Promise<CategoryRow[]> {
+  const { data, error } = await supabase
+    .from("categorias")
+    .select("*")
+    .order("orden", { ascending: true });
+  if (error) throw error;
+  return data ?? [];
+}
+
+export const productsQuery = queryOptions({
+  queryKey: ["productos"],
+  queryFn: fetchProducts,
+});
+
+export const categoriesQuery = queryOptions({
+  queryKey: ["categorias"],
+  queryFn: fetchCategories,
+});
+
+export const productQuery = (slug: string) =>
+  queryOptions({
+    queryKey: ["producto", slug],
+    queryFn: () => fetchProductBySlug(slug),
+  });
 
 export function formatPrice(value: number) {
   return new Intl.NumberFormat("es-AR", {
@@ -200,4 +116,14 @@ export function formatPrice(value: number) {
     currency: "USD",
     maximumFractionDigits: 0,
   }).format(value);
+}
+
+export function slugify(text: string) {
+  return text
+    .toString()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
 }
