@@ -29,7 +29,7 @@ function Contacto() {
             value: "Chat directo",
             href: `https://wa.me/${WHATSAPP_NUMBER}`,
           },
-          { icon: Mail, title: "Email", value: "hola@donatelo.com", href: "mailto:hola@donatelo.com" },
+          { icon: Mail, title: "Email", value: "donatelocelulares@gmail.com", href: "mailto:donatelocelulares@gmail.com" },
           { icon: Phone, title: "Teléfono", value: "+53 54633440", href: "tel:+5354633440" },
         ].map(({ icon: Icon, title, value, href }) => (
           <a
@@ -54,7 +54,7 @@ function Contacto() {
       <div className="mt-16 rounded-3xl border border-border bg-surface p-8">
         <div className="flex items-center gap-3 text-muted-foreground">
           <MapPin className="h-5 w-5 text-brand" />
-          <span>Showroom · Buenos Aires, Argentina · Lun a Sáb 10–19hs</span>
+          <span>La Habana - Cuba</span>
         </div>
       </div>
     </div>
