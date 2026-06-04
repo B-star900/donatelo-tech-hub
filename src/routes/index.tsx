@@ -154,7 +154,7 @@ function Home() {
         <section className="mx-auto max-w-3xl px-4 py-24 text-center">
           <h2 className="font-display text-3xl font-bold">Catálogo en preparación</h2>
           <p className="mt-3 text-muted-foreground">
-            Estamos cargando nuevos productos. Volvé pronto.
+            Estamos cargando nuevos productos. Vuelve pronto.
           </p>
         </section>
       )}
