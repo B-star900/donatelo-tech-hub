@@ -154,7 +154,7 @@ function Home() {
         <section className="mx-auto max-w-3xl px-4 py-24 text-center">
           <h2 className="font-display text-3xl font-bold">Catálogo en preparación</h2>
           <p className="mt-3 text-muted-foreground">
-            Estamos cargando nuevos productos. Volvé pronto.
+            Estamos cargando nuevos productos. Vuelve pronto.
           </p>
         </section>
       )}
@@ -169,46 +169,6 @@ function Home() {
         </section>
       )}
 
-      {/* BANNER */}
-      <section className="mx-auto max-w-7xl px-4 py-16 md:px-6">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="relative overflow-hidden rounded-3xl bg-gradient-brand p-10 text-white md:p-16"
-        >
-          <div className="absolute -right-20 -top-20 h-72 w-72 rounded-full bg-white/10 blur-3xl" />
-          <div className="absolute -bottom-24 -left-10 h-72 w-72 rounded-full bg-black/30 blur-3xl" />
-          <div className="relative grid items-center gap-6 md:grid-cols-2">
-            <div>
-              <p className="text-xs font-bold uppercase tracking-widest text-white/80">Oferta limitada</p>
-              <h2 className="mt-3 font-display text-4xl font-black leading-tight md:text-5xl">
-                Hasta <span className="text-white">30% OFF</span> en productos seleccionados.
-              </h2>
-              <p className="mt-3 max-w-md text-white/80">
-                Pagás menos, recibís en 24 hs y tenés garantía real.
-              </p>
-              <Link
-                to="/catalogo"
-                search={{ sort: "discount" } as never}
-                className="mt-6 inline-flex h-12 items-center gap-2 rounded-full bg-ink px-6 text-sm font-bold text-white"
-              >
-                Ver ofertas <ArrowRight className="h-4 w-4" />
-              </Link>
-            </div>
-          </div>
-        </motion.div>
-      </section>
-
-      {/* OFFERS */}
-      {offers.length > 0 && (
-        <section className="mx-auto max-w-7xl px-4 py-10 md:px-6">
-          <SectionHeader eyebrow="Ofertas" title="Promos del día" />
-          <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-            {offers.map((p, i) => <ProductCard key={p.id} product={p} index={i} />)}
-          </div>
-        </section>
-      )}
 
       {/* TRENDING */}
       {trending.length > 0 && (
