@@ -85,10 +85,15 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         content:
           "Celulares, informática y mecánica premium. Envíos rápidos, garantía real y atención por WhatsApp.",
       },
-      { property: "og:title", content: "DONATELO • CELULARES" },
-      { property: "og:description", content: "Tecnología premium con identidad latina." },
+      { property: "og:title", content: "DONATELO • CELULARES — Tecnología premium" },
+      { property: "og:description", content: "A premium e-commerce web application for a technology business, DONATELO • CELULARES." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "DONATELO • CELULARES — Tecnología premium" },
+      { name: "description", content: "A premium e-commerce web application for a technology business, DONATELO • CELULARES." },
+      { name: "twitter:description", content: "A premium e-commerce web application for a technology business, DONATELO • CELULARES." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/9e9da4c7-af82-4c87-a5b6-626ee3a0c252/id-preview-7bc5a83e--4b1bb9ea-7c8a-459a-b10b-f6b642c36214.lovable.app-1780568096841.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/9e9da4c7-af82-4c87-a5b6-626ee3a0c252/id-preview-7bc5a83e--4b1bb9ea-7c8a-459a-b10b-f6b642c36214.lovable.app-1780568096841.png" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
