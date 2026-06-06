@@ -143,7 +143,7 @@ export async function createOrder(opts: CheckoutData) {
     })),
     total: opts.total,
   };
-  const { data, error } = await supabase.from("pedidos").insert(payload).select().single();
+  const { error } = await supabase.from("pedidos").insert(payload);
   if (error) throw error;
-  return data;
+  return payload;
 }
