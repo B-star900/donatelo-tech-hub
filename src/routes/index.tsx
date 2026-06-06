@@ -36,9 +36,29 @@ function Home() {
   const { data: products } = useSuspenseQuery(productsQuery);
   const { data: categories } = useSuspenseQuery(categoriesQuery);
 
+  const [query, setQuery] = useState("");
+  const [activeCat, setActiveCat] = useState<string | null>(null);
+
+  const searchResults = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q && !activeCat) return [];
+    const tokens = q.split(/\s+/).filter(Boolean);
+    return products.filter((p) => {
+      if (activeCat && p.categorySlug !== activeCat) return false;
+      if (!tokens.length) return true;
+      const haystack = [p.name, p.brand, p.category, p.shortDesc, p.description, ...p.tags]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
+      return tokens.every((t) => haystack.includes(t));
+    });
+  }, [products, query, activeCat]);
+
+  const isSearching = query.trim().length > 0 || activeCat !== null;
+
   const featured = products.filter((p) => p.featured).slice(0, 4);
   const trending = products.slice(0, 4);
-  const offers = products.filter((p) => p.salePrice).slice(0, 4);
+
 
   return (
     <div>
