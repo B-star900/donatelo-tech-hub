@@ -1,7 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { ArrowRight, ShieldCheck, Truck, Zap, BadgeCheck } from "lucide-react";
+import { ArrowRight, ShieldCheck, Truck, Zap, BadgeCheck, Search, X } from "lucide-react";
+import { useMemo, useState } from "react";
 import heroImg from "@/assets/hero-phone.jpg";
 import { productsQuery, categoriesQuery } from "@/lib/products";
 import { ProductCard } from "@/components/site/ProductCard";
