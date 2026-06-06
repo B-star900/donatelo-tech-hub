@@ -127,7 +127,6 @@ function Home() {
         </div>
       </section>
 
-      </section>
 
       {/* SEARCH */}
       <section className="border-b border-border bg-surface/40">
