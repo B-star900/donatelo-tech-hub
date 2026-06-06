@@ -73,7 +73,7 @@ function Home() {
               transition={{ duration: 0.7, delay: 0.2 }}
               className="mt-6 max-w-xl text-base text-white/70 md:text-lg"
             >
-              Celulares, informática y herramientas profesionales. Las marcas que querés, al precio que merecés.
+              Celulares, informática y herramientas profesionales. Las marcas que quieres, al precio que mereces.
             </motion.p>
             <motion.div
               initial={{ opacity: 0, y: 20 }}
