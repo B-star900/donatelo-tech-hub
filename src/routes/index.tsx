@@ -127,8 +127,100 @@ function Home() {
         </div>
       </section>
 
+      </section>
+
+      {/* SEARCH */}
+      <section className="border-b border-border bg-surface/40">
+        <div className="mx-auto max-w-5xl px-4 py-10 md:px-6 md:py-14">
+          <div className="text-center">
+            <p className="text-xs font-bold uppercase tracking-widest text-brand">Buscar</p>
+            <h2 className="mt-2 font-display text-3xl font-black md:text-4xl">
+              ¿Qué estás buscando hoy?
+            </h2>
+          </div>
+          <div className="mx-auto mt-6 max-w-2xl">
+            <div className="relative">
+              <Search className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
+              <input
+                type="search"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Ej: Samsung A17, iPhone, laptop…"
+                className="h-14 w-full rounded-full border border-border bg-background pl-12 pr-12 text-base outline-none transition-colors focus:border-brand"
+              />
+              {query && (
+                <button
+                  onClick={() => setQuery("")}
+                  aria-label="Limpiar"
+                  className="absolute right-3 top-1/2 grid h-9 w-9 -translate-y-1/2 place-items-center rounded-full text-muted-foreground hover:bg-secondary"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              )}
+            </div>
+            {categories.length > 0 && (
+              <div className="mt-4 flex flex-wrap justify-center gap-2">
+                <button
+                  onClick={() => setActiveCat(null)}
+                  className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors ${
+                    !activeCat
+                      ? "border-ink bg-ink text-white"
+                      : "border-border bg-background text-foreground/70 hover:border-foreground/30"
+                  }`}
+                >
+                  Todas
+                </button>
+                {categories.map((c) => (
+                  <button
+                    key={c.id}
+                    onClick={() => setActiveCat(activeCat === c.slug ? null : c.slug)}
+                    className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors ${
+                      activeCat === c.slug
+                        ? "border-ink bg-ink text-white"
+                        : "border-border bg-background text-foreground/70 hover:border-foreground/30"
+                    }`}
+                  >
+                    {c.nombre}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {isSearching && (
+            <div className="mt-10">
+              <p className="mb-4 text-sm text-muted-foreground">
+                {searchResults.length === 0
+                  ? "No encontramos productos que coincidan."
+                  : `${searchResults.length} ${searchResults.length === 1 ? "resultado" : "resultados"}`}
+              </p>
+              {searchResults.length > 0 && (
+                <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+                  {searchResults.slice(0, 8).map((p, i) => (
+                    <ProductCard key={p.id} product={p} index={i} />
+                  ))}
+                </div>
+              )}
+              {searchResults.length > 8 && (
+                <div className="mt-6 text-center">
+                  <Link
+                    to="/catalogo"
+                    search={{ q: query || undefined } as never}
+                    className="inline-flex h-11 items-center gap-2 rounded-full bg-brand px-5 text-sm font-bold text-brand-foreground"
+                  >
+                    Ver todos los resultados
+                    <ArrowRight className="h-4 w-4" />
+                  </Link>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </section>
+
       {/* CATEGORIES */}
-      {categories.length > 0 && (
+      {categories.length > 0 && !isSearching && (
+
         <section className="mx-auto max-w-7xl px-4 py-20 md:px-6">
           <SectionHeader eyebrow="Explorar" title="Categorías" />
           <div className="mt-8 grid gap-4 md:grid-cols-3">
