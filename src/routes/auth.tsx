@@ -42,9 +42,7 @@ function AuthPage() {
   return (
     <div className="mx-auto grid min-h-[80vh] max-w-md place-items-center px-4 py-12">
       <div className="w-full rounded-3xl border border-border bg-card p-8 shadow-elegant">
-        <h1 className="font-display text-3xl font-black">
-          {mode === "login" ? "Iniciar sesión" : "Crear cuenta"}
-        </h1>
+        <h1 className="font-display text-3xl font-black">Iniciar sesión</h1>
         <p className="mt-2 text-sm text-muted-foreground">
           Acceso al panel administrador de DONATELO.
         </p>
