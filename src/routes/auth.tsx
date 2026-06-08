@@ -88,19 +88,12 @@ function AuthPage() {
             disabled={loading}
             className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-brand text-sm font-bold text-brand-foreground shadow-brand transition-transform hover:scale-[1.01] disabled:opacity-60"
           >
-            {loading ? "Procesando..." : mode === "login" ? "Entrar" : "Crear cuenta"}
+            {loading ? "Procesando..." : "Entrar"}
             <ArrowRight className="h-4 w-4" />
           </button>
         </form>
 
-        <button
-          onClick={() => setMode((m) => (m === "login" ? "signup" : "login"))}
-          className="mt-6 w-full text-center text-sm text-muted-foreground hover:text-brand"
-        >
-          {mode === "login"
-            ? "¿No tenés cuenta? Registrate"
-            : "¿Ya tenés cuenta? Iniciar sesión"}
-        </button>
+
 
         <Link
           to="/"
