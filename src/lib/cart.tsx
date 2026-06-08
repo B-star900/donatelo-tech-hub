@@ -31,9 +31,26 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) setItems(JSON.parse(raw));
-    } catch {}
+      const raw = typeof localStorage !== "undefined" ? localStorage.getItem(STORAGE_KEY) : null;
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) {
+          // Saneamos: descartamos items con producto inválido o qty no numérica.
+          const safe = parsed.filter(
+            (it: unknown): it is CartItem =>
+              !!it &&
+              typeof it === "object" &&
+              "product" in it &&
+              !!(it as CartItem).product?.id &&
+              typeof (it as CartItem).qty === "number" &&
+              (it as CartItem).qty > 0,
+          );
+          setItems(safe);
+        }
+      }
+    } catch (e) {
+      console.warn("[cart] no se pudo leer el carrito local:", e);
+    }
     setHydrated(true);
   }, []);
 
@@ -41,7 +58,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
     if (!hydrated) return;
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
-    } catch {}
+    } catch (e) {
+      console.warn("[cart] no se pudo guardar el carrito local:", e);
+    }
   }, [items, hydrated]);
 
   const value = useMemo<CartCtx>(() => {
