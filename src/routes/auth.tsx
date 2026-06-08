@@ -79,7 +79,7 @@ function AuthPage() {
                 onChange={(e) => setPassword(e.target.value)}
                 className="h-12 w-full rounded-xl border border-border bg-background pl-10 pr-3 text-sm outline-none focus:border-foreground/40"
                 placeholder="••••••••"
-                autoComplete={mode === "login" ? "current-password" : "new-password"}
+                autoComplete="current-password"
               />
             </div>
           </div>
