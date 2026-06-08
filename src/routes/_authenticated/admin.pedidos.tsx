@@ -4,6 +4,7 @@ import { Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { formatPrice } from "@/lib/products";
+import { formatDate } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/admin/pedidos")({
   component: PedidosAdmin,
