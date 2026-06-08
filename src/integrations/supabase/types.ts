@@ -56,6 +56,7 @@ export type Database = {
           items: Json
           notas: string | null
           numero: number
+          stock_descontado: boolean
           total: number
           updated_at: string
         }
@@ -70,6 +71,7 @@ export type Database = {
           items?: Json
           notas?: string | null
           numero?: number
+          stock_descontado?: boolean
           total?: number
           updated_at?: string
         }
@@ -84,6 +86,7 @@ export type Database = {
           items?: Json
           notas?: string | null
           numero?: number
+          stock_descontado?: boolean
           total?: number
           updated_at?: string
         }

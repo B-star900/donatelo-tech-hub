@@ -36,21 +36,34 @@ function CartPage() {
   }
 
   async function handleCheckout() {
+    if (submitting) return;
     if (!name.trim() || !phone.trim()) {
       toast.error("Necesitamos tu nombre y teléfono.");
       return;
     }
     setSubmitting(true);
+    const data = { items, total: subtotal, name, phone, email, address, notas };
+    const url = buildWhatsAppUrl(data);
+    // Abrimos la pestaña sincrónicamente con el click para evitar que el navegador
+    // bloquee el popup. Luego le seteamos la URL final.
+    const win = typeof window !== "undefined" ? window.open("", "_blank") : null;
     try {
-      const data = { items, total: subtotal, name, phone, email, address, notas };
       await createOrder(data);
-      const url = buildWhatsAppUrl(data);
       toast.success("Pedido registrado. Te llevamos a WhatsApp.");
       clear();
-      window.open(url, "_blank", "noopener");
+      if (win && !win.closed) {
+        win.location.href = url;
+      } else {
+        // Popup bloqueado → redirección directa.
+        window.location.href = url;
+        return;
+      }
       navigate({ to: "/" });
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "No pudimos guardar el pedido");
+      if (win && !win.closed) win.close();
+      const msg = e instanceof Error ? e.message : "No pudimos guardar el pedido";
+      console.error("[checkout]", e);
+      toast.error(msg);
     } finally {
       setSubmitting(false);
     }
