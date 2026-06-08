@@ -28,19 +28,9 @@ function AuthPage() {
     if (loading) return;
     setLoading(true);
     try {
-      if (mode === "login") {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) throw error;
-        toast.success("Sesión iniciada");
-      } else {
-        const { error } = await supabase.auth.signUp({
-          email,
-          password,
-          options: { emailRedirectTo: `${window.location.origin}/admin` },
-        });
-        if (error) throw error;
-        toast.success("Cuenta creada. Revisá tu email para confirmar.");
-      }
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) throw error;
+      toast.success("Sesión iniciada");
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Error";
       toast.error(msg);
