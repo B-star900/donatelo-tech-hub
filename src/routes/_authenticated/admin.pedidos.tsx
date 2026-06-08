@@ -72,7 +72,7 @@ function PedidosAdmin() {
                 <div className="flex-1">
                   <div className="font-semibold">{o.cliente_nombre}</div>
                   <div className="text-xs text-muted-foreground">
-                    {o.cliente_telefono} · {new Date(o.created_at).toLocaleString("es-AR")}
+                    {o.cliente_telefono} · {formatDate(o.created_at)}
                   </div>
                 </div>
                 <select
