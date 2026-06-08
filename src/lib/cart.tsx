@@ -148,21 +148,31 @@ export function buildWhatsAppUrl(opts: CheckoutData) {
 
 /** Persists order to database, returns row or null. */
 export async function createOrder(opts: CheckoutData) {
+  const name = (opts.name || "").trim();
+  const phone = (opts.phone || "").trim();
+  if (!name || !phone) throw new Error("Faltan datos del cliente.");
+  if (!Array.isArray(opts.items) || opts.items.length === 0) {
+    throw new Error("El carrito está vacío.");
+  }
+  const total = Number(opts.total);
   const payload = {
-    cliente_nombre: opts.name,
-    cliente_telefono: opts.phone,
-    cliente_email: opts.email || null,
-    cliente_direccion: opts.address || null,
-    notas: opts.notas || null,
+    cliente_nombre: name.slice(0, 200),
+    cliente_telefono: phone.slice(0, 50),
+    cliente_email: opts.email?.trim().slice(0, 200) || null,
+    cliente_direccion: opts.address?.trim().slice(0, 500) || null,
+    notas: opts.notas?.trim().slice(0, 1000) || null,
     items: opts.items.map((i) => ({
       slug: i.product.id,
       nombre: i.product.name,
-      qty: i.qty,
-      precio: i.product.salePrice ?? i.product.price,
+      qty: Number(i.qty) || 1,
+      precio: Number(i.product.salePrice ?? i.product.price) || 0,
     })),
-    total: opts.total,
+    total: isFinite(total) ? total : 0,
   };
   const { error } = await supabase.from("pedidos").insert(payload);
-  if (error) throw error;
+  if (error) {
+    console.error("[createOrder] error guardando pedido:", error);
+    throw new Error(error.message || "No pudimos guardar el pedido.");
+  }
   return payload;
 }
