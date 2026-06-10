@@ -7,6 +7,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { categoriesQuery, formatPrice, slugify } from "@/lib/products";
 import type { Database } from "@/integrations/supabase/types";
 import { ImageUploader } from "@/components/admin/ImageUploader";
+import { MultiImageUploader } from "@/components/admin/MultiImageUploader";
+import { ColorEditor } from "@/components/admin/ColorEditor";
+import type { ProductColor } from "@/lib/products";
 
 type ProductRow = Database["public"]["Tables"]["productos"]["Row"];
 
@@ -161,6 +164,23 @@ function ProductDialog({
   onClose: () => void;
   onSaved: () => void;
 }) {
+  const initialGaleria = Array.isArray(initial?.galeria)
+    ? (initial!.galeria as unknown[]).filter((g): g is string => typeof g === "string")
+    : [];
+  const initialColores: ProductColor[] = Array.isArray((initial as any)?.colores)
+    ? ((initial as any).colores as unknown[])
+        .map((c) => {
+          if (c && typeof c === "object") {
+            const o = c as Record<string, unknown>;
+            const nombre = typeof o.nombre === "string" ? o.nombre : "";
+            const hex = typeof o.hex === "string" ? o.hex : "";
+            if (nombre && hex) return { nombre, hex };
+          }
+          return null;
+        })
+        .filter((c): c is ProductColor => c !== null)
+    : [];
+
   const [form, setForm] = useState({
     nombre: initial?.nombre ?? "",
     slug: initial?.slug ?? "",
@@ -170,6 +190,8 @@ function ProductDialog({
     categoria_id: initial?.categoria_id ?? categorias[0]?.id ?? "",
     marca: initial?.marca ?? "",
     imagen_url: initial?.imagen_url ?? "",
+    galeria: initialGaleria,
+    colores: initialColores,
     stock: initial?.stock != null ? String(initial.stock) : "0",
     destacado: initial?.destacado ?? false,
     en_oferta: initial?.en_oferta ?? false,
@@ -177,11 +199,20 @@ function ProductDialog({
 
   const [saving, setSaving] = useState(false);
 
+  const precioNum = Number(form.precio || 0);
+  const precioOrigNum = Number(form.precio_original || 0);
+  const descuento =
+    form.en_oferta && precioOrigNum > 0 && precioNum < precioOrigNum
+      ? Math.round((1 - precioNum / precioOrigNum) * 100)
+      : 0;
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setSaving(true);
     try {
-      const payload = {
+      // Imagen principal: si no se seleccionó, usar la primera de la galería
+      const imagen_url = form.imagen_url || form.galeria[0] || null;
+      const payload: any = {
         nombre: form.nombre,
         slug: form.slug || slugify(form.nombre),
         descripcion: form.descripcion || null,
@@ -189,7 +220,9 @@ function ProductDialog({
         precio_original: form.precio_original ? Number(form.precio_original) : null,
         categoria_id: form.categoria_id || null,
         marca: form.marca || null,
-        imagen_url: form.imagen_url || null,
+        imagen_url,
+        galeria: form.galeria,
+        colores: form.colores,
         stock: Number(form.stock || 0),
         destacado: form.destacado,
         en_oferta: form.en_oferta,
@@ -253,10 +286,21 @@ function ProductDialog({
               bucket="productos"
               value={form.imagen_url}
               onChange={(url) => setForm({ ...form, imagen_url: url })}
-              label="Imagen del producto"
+              label="Imagen principal (opcional, si vacía se usa la primera de la galería)"
             />
           </div>
-          <Field label="O pegar URL de imagen" value={form.imagen_url} onChange={(v) => setForm({ ...form, imagen_url: v })} placeholder="https://..." />
+          <div className="sm:col-span-2">
+            <MultiImageUploader
+              value={form.galeria}
+              onChange={(urls) => setForm({ ...form, galeria: urls })}
+            />
+          </div>
+          <div className="sm:col-span-2">
+            <ColorEditor
+              value={form.colores}
+              onChange={(colores) => setForm({ ...form, colores })}
+            />
+          </div>
           <div className="sm:col-span-2">
             <Label>Descripción</Label>
             <textarea
@@ -272,7 +316,7 @@ function ProductDialog({
           </label>
           <label className="flex items-center gap-2 text-sm">
             <input type="checkbox" checked={form.en_oferta} onChange={(e) => setForm({ ...form, en_oferta: e.target.checked })} />
-            En oferta
+            En oferta {descuento > 0 && <span className="ml-1 rounded-full bg-brand px-2 py-0.5 text-[10px] font-bold text-brand-foreground">-{descuento}%</span>}
           </label>
           <div className="sm:col-span-2 mt-2 flex justify-end gap-2">
             <button type="button" onClick={onClose} className="h-11 rounded-full border border-border px-5 text-sm font-semibold">

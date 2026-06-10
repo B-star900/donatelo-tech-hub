@@ -5,6 +5,11 @@ import type { Database } from "@/integrations/supabase/types";
 export type ProductRow = Database["public"]["Tables"]["productos"]["Row"];
 export type CategoryRow = Database["public"]["Tables"]["categorias"]["Row"];
 
+export interface ProductColor {
+  nombre: string;
+  hex: string;
+}
+
 export interface Product {
   /** Slug — used as URL id and cart key. */
   id: string;
@@ -20,6 +25,7 @@ export interface Product {
   description: string;
   image: string;
   images: string[];
+  colors: ProductColor[];
   stock: number;
   rating: number;
   reviews: number;
@@ -40,6 +46,20 @@ export function mapProduct(row: Row): Product {
   const galeria = Array.isArray(row.galeria)
     ? (row.galeria as unknown[]).filter((g): g is string => typeof g === "string")
     : [];
+  const coloresRaw = (row as unknown as { colores?: unknown }).colores;
+  const colors: ProductColor[] = Array.isArray(coloresRaw)
+    ? (coloresRaw as unknown[])
+        .map((c) => {
+          if (c && typeof c === "object") {
+            const o = c as Record<string, unknown>;
+            const nombre = typeof o.nombre === "string" ? o.nombre : "";
+            const hex = typeof o.hex === "string" ? o.hex : "";
+            if (nombre && hex) return { nombre, hex };
+          }
+          return null;
+        })
+        .filter((c): c is ProductColor => c !== null)
+    : [];
   return {
     id: row.slug,
     dbId: row.id,
@@ -53,6 +73,7 @@ export function mapProduct(row: Row): Product {
     description: row.descripcion ?? "",
     image: row.imagen_url || galeria[0] || FALLBACK_IMG,
     images: galeria.length ? galeria : [row.imagen_url || FALLBACK_IMG],
+    colors,
     stock: row.stock,
     rating: Number(row.rating),
     reviews: row.reviews_count,

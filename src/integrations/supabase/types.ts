@@ -96,6 +96,7 @@ export type Database = {
         Row: {
           activo: boolean
           categoria_id: string | null
+          colores: Json
           created_at: string
           descripcion: string | null
           destacado: boolean
@@ -117,6 +118,7 @@ export type Database = {
         Insert: {
           activo?: boolean
           categoria_id?: string | null
+          colores?: Json
           created_at?: string
           descripcion?: string | null
           destacado?: boolean
@@ -138,6 +140,7 @@ export type Database = {
         Update: {
           activo?: boolean
           categoria_id?: string | null
+          colores?: Json
           created_at?: string
           descripcion?: string | null
           destacado?: boolean

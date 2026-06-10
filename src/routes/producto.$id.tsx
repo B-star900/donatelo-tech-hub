@@ -37,11 +37,17 @@ function ProductPage() {
   const { data: all } = useSuspenseQuery(productsQuery);
   const { add, open } = useCart();
   const [qty, setQty] = useState(1);
+  const [activeImg, setActiveImg] = useState(0);
+  const [activeColor, setActiveColor] = useState<string | null>(null);
 
   if (!product) return null;
 
   const onSale = product.salePrice && product.salePrice < product.price;
   const price = product.salePrice ?? product.price;
+  const discount = onSale
+    ? Math.round((1 - (product.salePrice as number) / product.price) * 100)
+    : 0;
+  const images = product.images.length ? product.images : [product.image];
   const related = all
     .filter((p) => p.category === product.category && p.id !== product.id)
     .slice(0, 4);
@@ -57,14 +63,40 @@ function ProductPage() {
       </nav>
 
       <div className="mt-6 grid gap-10 md:grid-cols-2">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.98 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.4 }}
-          className="aspect-square overflow-hidden rounded-3xl bg-surface"
-        >
-          <img src={product.image} alt={product.name} className="h-full w-full object-cover" />
-        </motion.div>
+        <div>
+          <motion.div
+            initial={{ opacity: 0, scale: 0.98 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.4 }}
+            className="relative aspect-square overflow-hidden rounded-3xl bg-surface"
+          >
+            {onSale && (
+              <span className="absolute left-3 top-3 z-10 rounded-full bg-brand px-3 py-1 text-xs font-bold uppercase text-brand-foreground">
+                -{discount}%
+              </span>
+            )}
+            <img
+              src={images[activeImg] ?? images[0]}
+              alt={product.name}
+              className="h-full w-full object-cover"
+            />
+          </motion.div>
+          {images.length > 1 && (
+            <div className="mt-3 grid grid-cols-5 gap-2">
+              {images.map((src, i) => (
+                <button
+                  key={src + i}
+                  onClick={() => setActiveImg(i)}
+                  className={`aspect-square overflow-hidden rounded-xl border-2 transition-colors ${
+                    activeImg === i ? "border-brand" : "border-transparent hover:border-border"
+                  }`}
+                >
+                  <img src={src} alt="" className="h-full w-full object-cover" />
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
 
         <div>
           <p className="text-xs font-bold uppercase tracking-widest text-brand">{product.brand}</p>
@@ -93,6 +125,28 @@ function ProductPage() {
               </span>
             )}
           </div>
+
+          {product.colors.length > 0 && (
+            <div className="mt-6">
+              <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+                Color: <span className="text-foreground">{activeColor ?? "Elegí uno"}</span>
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {product.colors.map((c) => (
+                  <button
+                    key={c.nombre}
+                    onClick={() => setActiveColor(c.nombre)}
+                    title={c.nombre}
+                    className={`h-9 w-9 rounded-full border-2 transition-transform hover:scale-110 ${
+                      activeColor === c.nombre ? "border-brand ring-2 ring-brand/30" : "border-border"
+                    }`}
+                    style={{ background: c.hex }}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+
 
           <div className="mt-6 flex flex-wrap items-center gap-3">
             <div className="inline-flex items-center rounded-full border border-border">
